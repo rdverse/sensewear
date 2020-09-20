@@ -1,4 +1,4 @@
-# rsch_sensors_data_cap
+# flutter_sensors_wearos
 
 A new Flutter application.
 
