@@ -26,6 +26,8 @@ dependencies:
   ppg: ^0.1.9
   permission_handler: ^4.0.0
   scoped_model: ^1.0.1
+  veepoo_sdk: ^0.0.1
+
   #  audioplayers: ^0.7.8
   #wear: ^0.0.3
   flutter:
