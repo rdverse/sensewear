@@ -5,7 +5,7 @@ Flutter Application to access and capture sensor data.
 ## Progress Update
 * Created a watch face using flutter_wear
 ![Watch face](/images/flutter_wear.png)
-
+Format : [Credits](https://pub.dev/packages/flutter_wear)
 
 ## To Do
 * Access and log sensors data. 
