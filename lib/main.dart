@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_wear/flutter_wear.dart';
 import 'package:flutter_wear/mode.dart';
 import 'package:flutter_wear/shape.dart';
 import 'package:flutter_wear/wear_mode.dart';
@@ -44,7 +44,7 @@ class _MyAppState extends State<MyApp> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Row(),
-                    FlutterLogo(size: 100),
+                    FlutterLogo(size: 150),
                     Text(
                       'Shape: ${shape == Shape.round ? 'round' : 'square'}',
                       style: TextStyle(color: _textColor),
