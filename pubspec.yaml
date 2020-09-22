@@ -23,7 +23,9 @@ environment:
 dependencies:
   flutter_wear: ^0.1.1
   sensors: ^0.4.2+4
- # ppg: ^0.1.9
+  conditional_builder: ^1.0.2
+
+  # ppg: ^0.1.9
  # permission_handler: ^4.0.0
  # scoped_model: ^1.0.1
  # veepoo_sdk: ^0.0.1

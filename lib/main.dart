@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'data.dart';
 import 'package:sensors/sensors.dart';
 import 'dart:async';
+import 'package:conditional_builder/conditional_builder.dart';
 
 import 'package:flutter_wear/mode.dart';
 import 'package:flutter_wear/shape.dart';
@@ -22,20 +23,21 @@ class Home extends StatefulWidget{
 }
 
 class _HomeState extends State<Home> {
-  int accel =0;
-  int gyro = 0;
-  bool isCapturing = false;
-  List<double> accelList;
-  List<double> gyroList;
+
   Color capColor = Colors.deepOrangeAccent;
-  var sensor = new Sensors.setCap(false);
-  AccelerometerEvent acceleration;
-  StreamSubscription<AccelerometerEvent> _streamSubscription;
-  List<StreamSubscription<dynamic>> _streamSubscriptions =   <StreamSubscription<dynamic>>[];
-  Timer _timer;
+  Color backColor = Colors.black12;
+
+  AccelerometerEvent accelEvent;
+  StreamSubscription accelStSub;
+
+  GyroscopeEvent gyroEvent;
+  StreamSubscription gyroStSub;
+
+  //Timer _timer;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backColor,
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(15, 200, 250, 0.8),
         title: Text('Sensors Data',
@@ -66,11 +68,26 @@ class _HomeState extends State<Home> {
               child: FloatingActionButton(
                 onPressed: () {
                   setState(() {
-                    accel+=1000;
-                    gyro+=2000;
-                    sensor.isCapturing = true;
-                    capColor = Colors.greenAccent;
-                    sensor.captureFunction();
+
+                    backColor= Colors.greenAccent;
+                    capColor = Colors.green;
+                    //sensor.captureFunction();
+                    if(accelStSub == null) {
+
+                      gyroStSub = gyroscopeEvents.listen((GyroscopeEvent eveG) {
+                        setState(() {
+                          gyroEvent = eveG;
+                        });});
+
+                      accelStSub = accelerometerEvents.listen((AccelerometerEvent eveA) {
+                        setState(() {
+                          accelEvent = eveA;
+                        });});
+                      if(accelStSub.isPaused){
+                        accelStSub.resume();
+                        gyroStSub.resume();
+                      }
+                    }
                   });
                 },
                 child: Text('Start'),
@@ -81,10 +98,13 @@ class _HomeState extends State<Home> {
               child: FloatingActionButton(
                 onPressed: () {
                   setState(() {
-                    accel= accel - 500;
-                    gyro = gyro - 100;
-                    sensor.isCapturing = false;
-                    capColor = Colors.deepOrangeAccent;
+                    //accel= accel - 500;
+                    //gyro = gyro - 100;
+                    //sensor.isCapturing = false;
+                    backColor = Colors.deepOrangeAccent;
+                    capColor = Colors.red;
+                    accelStSub.pause();
+                    gyroStSub.pause();
                       });
 
                 },
@@ -94,13 +114,19 @@ class _HomeState extends State<Home> {
           ],
         ),
           //Display the text here
-          Text("Accel : ${sensor.accel}"),
-          Text("Gyro: ${sensor.gyro}"),
-      ]
-      ),
-    );
+      if(accelEvent!=null)
+      Text("Accel : x: ${accelEvent.x.round()}, y: ${accelEvent.y.round()}, z: ${accelEvent.z.round()}"),
+          if(gyroEvent!=null)
+            Text("Gyro: x: ${gyroEvent.x.round()},y: ${gyroEvent.y.round()},z: ${gyroEvent.z.round()}"),
+
+
+        ]
+    ),
+      );
   }
 }
+
+
 
 
 

@@ -1,3 +1,9 @@
+# Local Files
+/lib/code.dart
+/lib/data.dart
+/lib/snake.dart
+
+
 # Miscellaneous
 *.class
 *.log
@@ -39,3 +45,6 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+
+

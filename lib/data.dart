@@ -1,10 +1,6 @@
 import 'package:sensors/sensors.dart';
 
 
-
-
-
-
 class Sensors{
   List<double> accel;
   List<double> gyro;
@@ -28,7 +24,6 @@ class Sensors{
 // [GyroscopeEvent (x: 0.0, y: 0.0, z: 0.0)]
   }
 
-
   Future<void> captureFunction() async {
 
     while(isCapturing) {
@@ -36,8 +31,6 @@ class Sensors{
       //print('text');
       setVals();
     }
-
-
   }
 }
 
