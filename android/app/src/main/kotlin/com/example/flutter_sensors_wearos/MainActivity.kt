@@ -1,8 +1,8 @@
 package com.example.flutter_sensors_wearos
-
-// Except the package name
-// Replace everything
-
+//
+//// Except the package name
+//// Replace everything
+//
 import android.os.Bundle
 
 import io.flutter.app.FlutterActivity
@@ -26,3 +26,29 @@ class MainActivity: FlutterActivity(), AmbientMode.AmbientCallbackProvider {
         return FlutterAmbientCallback(getChannel(flutterView))
     }
 }
+
+//package com.mjohnsullivan.flutterwear.wearexample
+
+//import android.os.Bundle
+//
+//import io.flutter.app.FlutterActivity
+//import io.flutter.plugins.GeneratedPluginRegistrant
+//
+//import android.support.wear.ambient.AmbientMode
+//
+//import com.mjohnsullivan.flutterwear.wear.FlutterAmbientCallback
+//import com.mjohnsullivan.flutterwear.wear.getChannel
+//
+//class MainActivity: FlutterActivity(), AmbientMode.AmbientCallbackProvider {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        GeneratedPluginRegistrant.registerWith(this)
+//
+//        // Wire up the activity for ambient callbacks
+//        AmbientMode.attachAmbientSupport(this)
+//    }
+//
+//    override fun getAmbientCallback(): AmbientMode.AmbientCallback {
+//        return FlutterAmbientCallback(getChannel(flutterView))
+//    }
+//}

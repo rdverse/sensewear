@@ -23,11 +23,11 @@ environment:
 dependencies:
   flutter_wear: ^0.1.1
   sensors: ^0.4.2+4
-  ppg: ^0.1.9
-  permission_handler: ^4.0.0
-  scoped_model: ^1.0.1
-  veepoo_sdk: ^0.0.1
-
+ # ppg: ^0.1.9
+ # permission_handler: ^4.0.0
+ # scoped_model: ^1.0.1
+ # veepoo_sdk: ^0.0.1
+  #wear: ^0.0.3
   #  audioplayers: ^0.7.8
   #wear: ^0.0.3
   flutter:
@@ -58,7 +58,8 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
-
+  assets:
+    - images/sensor.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 
@@ -82,5 +83,9 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+  fonts:
+    - family: BadScript
+      fonts:
+        - asset: fonts/BadScript-Regular.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

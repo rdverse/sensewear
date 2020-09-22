@@ -1,18 +1,20 @@
+
 # flutter_sensors_wearos
+
+>>>>>WORK IN PROGRESS<<<<<<
 
 Flutter Application to access and capture sensor data.
 
 ## Progress Update
 * Created a watch face using flutter_wear
 ![Watch face](/images/flutter_wear.png)
-[Credits](https://pub.dev/packages/flutter_wear)
 
-* Access to ppg, acelerometer, and gyroscope data.
+* Get acelerometer, and gyroscope data through loops.
+![Capture](/images/cap_data.png)
 
 
 ## To Do
-* Save sensors data.
-* Access all sensors data.
-* Capture data for an extended period of time.
-* Try to save the sensors data on the cloud or the device.
+* Use StreamSubscriptions instead of loops
+* store json data on watch storage(~6GB available)
+* set timer for ppg sensor
 
