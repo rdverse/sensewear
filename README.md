@@ -11,14 +11,13 @@ Flutter Application to access and capture sensor data.
 
 * Start
 
- ** ![Capture](/images/imusense.png)<!-- .element height="50%" width="50%" -->
+ ** ![Capture](/images/imusense.png)<!-- .element height="25%" width="25%" -->
 
 * Stop
 
-** ![Capture](/images/imustopsense.png)<!-- .element height="50%" width="50%" -->
+** ![Capture](/images/imustopsense.png)<!-- .element height="25%" width="25%" -->
 
 
 ## To Do
-* store json data on watch storage(~6GB available)
 * set timer for ppg sensor
-
+* Modify sampling rates of imu sensors

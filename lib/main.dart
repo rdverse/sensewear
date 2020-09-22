@@ -4,16 +4,46 @@ import 'data.dart';
 import 'package:sensors/sensors.dart';
 import 'dart:async';
 import 'package:conditional_builder/conditional_builder.dart';
-
+import 'dart:io';
 import 'package:flutter_wear/mode.dart';
 import 'package:flutter_wear/shape.dart';
 import 'package:flutter_wear/wear_mode.dart';
 import 'package:flutter_wear/wear_shape.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:csv/csv.dart';
 
 
 void main() => runApp(MaterialApp(
   home: Home(),
 ));
+
+class Storage{
+
+  Future<String> get localPath async {
+    final dir = await getApplicationDocumentsDirectory();
+    return(dir.path);
+  }
+  Future<File> get localFile async {
+    final path = await localPath;
+    return(File('$path'));
+  }
+
+  Future<String> readData() async {
+    try{
+      final file = await localFile;
+      String body = await file.readAsString();
+      return body;
+    }
+    catch(e){print('Error incurred in reading file $e');}
+  }
+
+  Future<File> writeData(String data) async{
+    final file = await localFile;
+    return(file.writeAsString("$data"));
+  }
+}
+
+
 
 //Stateless widget cannot change over time
 class Home extends StatefulWidget{
@@ -23,7 +53,8 @@ class Home extends StatefulWidget{
 }
 
 class _HomeState extends State<Home> {
-
+  final Storage storage;
+  Home({Key key, @required this.storage}) : super(key: key);
   Color capColor = Colors.deepOrangeAccent;
   Color backColor = Colors.black12;
 
@@ -33,7 +64,33 @@ class _HomeState extends State<Home> {
   GyroscopeEvent gyroEvent;
   StreamSubscription gyroStSub;
 
+  Future<File> file;
+
   //Timer _timer;
+
+  @override void initState()  {
+    // THis sets up the csv we need to store the sensor data
+    super.initState();
+    this.file =  getFile();
+  }
+
+  Future<File> getFile() async{
+    final directory =  await getApplicationDocumentsDirectory();
+    final pathOfTheFileToWrite = 'data/app' + "/myCsvFile.csv";
+    print(pathOfTheFileToWrite);
+    File file =  File(pathOfTheFileToWrite);
+    return file;
+  }
+
+  void writeToCsv(file, accelList, gyroList) async {
+    List<double> row;
+    row = accelList.add(gyroList);
+    List<List<dynamic>> rows  = List<List<dynamic>>();
+    rows.add(row);
+    String csv = const ListToCsvConverter().convert(rows);
+    file.writeAsString(csv);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +134,7 @@ class _HomeState extends State<Home> {
                       gyroStSub = gyroscopeEvents.listen((GyroscopeEvent eveG) {
                         setState(() {
                           gyroEvent = eveG;
+                          writeToCsv(file, [accelEvent.x, accelEvent.y, accelEvent.z], [gyroEvent.x, gyroEvent.y, gyroEvent.z]);
                         });});
 
                       accelStSub = accelerometerEvents.listen((AccelerometerEvent eveA) {
@@ -125,6 +183,8 @@ class _HomeState extends State<Home> {
       );
   }
 }
+
+
 
 
 
