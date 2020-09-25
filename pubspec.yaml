@@ -26,6 +26,11 @@ dependencies:
   conditional_builder: ^1.0.2
   csv: ^4.0.3
   path_provider: ^1.6.17
+  ppg: ^0.1.9
+  permission_handler: ^4.0.0
+  scoped_model: ^1.0.1
+
+
 
 
 

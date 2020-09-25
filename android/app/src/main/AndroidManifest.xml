@@ -3,6 +3,11 @@
     <!-- Required for ambient mode support -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+
+    <uses-feature android:name="android.hardware.sensor.heartrate" />
+    <!-- Permission required for android on body sensors-->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+
     <!-- Flags the app as a Wear app -->
     <uses-feature android:name="android.hardware.type.watch" />
 
