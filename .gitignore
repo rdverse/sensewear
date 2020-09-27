@@ -2,7 +2,7 @@
 /lib/code.dart
 /lib/data.dart
 /lib/snake.dart
-
+/android/app/google-services.json
 
 # Miscellaneous
 *.class
