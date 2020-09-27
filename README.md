@@ -1,16 +1,12 @@
 # sensewear
 
-A new Flutter application.
+Application to stream accelerometer data on an android smartwatch.
 
-## Getting Started
+## Current Issue
 
-This project is a starting point for a Flutter application.
+Accelelerometer sampling rate is getting effected when a "write to csv" function is called or during file upload to firebase.
 
-A few resources to get you started if this is your first Flutter project:
+## Fix 
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Use different isolates and run parts of program on different threads.
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
