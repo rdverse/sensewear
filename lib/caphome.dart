@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import 'package:sensewear/dispatcher.dart';
 import 'package:sensors/sensors.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
@@ -7,6 +8,7 @@ import 'dart:convert' show utf8;
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:isolate';
 
 
 class capturehome extends StatefulWidget {
@@ -16,7 +18,7 @@ class capturehome extends StatefulWidget {
 
 
 class _capturehomeState extends State<capturehome> {
-
+  Isolate isolate;
   //Variables to initialize
   Color capColor = Colors.deepOrangeAccent;
   Color backColor = Colors.white60;
@@ -32,6 +34,10 @@ class _capturehomeState extends State<capturehome> {
   List<List<dynamic>> accelList = List<List<dynamic>>();
   List<List<dynamic>> userAccelList = List<List<dynamic>>();
 
+  List<List<dynamic>> meanAccelList = List<List<dynamic>>();
+  List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
+
+
   List<StreamSubscription<dynamic>> _streamSubscriptions =
   <StreamSubscription<dynamic>>[];
   // This widget is the root of your application.
@@ -39,52 +45,6 @@ class _capturehomeState extends State<capturehome> {
   File file;
   var sink;
   String pathOfTheFileToWrite;
-
-  Future<String> get localPath async {
-    final dir = await getApplicationDocumentsDirectory();
-    return(dir.path);
-  }
-
-  Future<File> Write(values, type) async{
-    List<List<dynamic>> toStore = new List<List<dynamic>>();
-    // Initial a csv file and push this on top of that
-    //toStore.add(values);
-    toStore = values;
-    final directory =  await localPath;
-    String filename = '/';
-    filename = filename + DateTime.now().toString();
-    filename = filename + type;
-    filename = filename + ".csv";
-    final pathOfTheFileToWrite = directory + filename;
-  //  print(pathOfTheFileToWrite);
-    File file =   File(pathOfTheFileToWrite);
- //   String csv = const ListToCsvConverter().convert(toStore);
- //   file.writeAsString(csv);
- //   uploadFile(pathOfTheFileToWrite, file);
-    return(file);
-  }
-
-  Future uploadFile(fileName, csvFile) async {
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(csvFile);
-    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
-    setState(() {
-      //upload complete variable declaration
-    });
-  }
-
-  void Read() async{
-    final directory =  await localPath;
-    final pathOfTheFileToWrite = directory + "/myFile.csv";
-    print(pathOfTheFileToWrite);
-    File file = File(pathOfTheFileToWrite);
-    final Stream<List> contents = await file.openRead();
-    contents
-        .transform(utf8.decoder)
-        .transform(new LineSplitter()).listen((String line) async {
-      await print('Contents are $line');
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +84,9 @@ class _capturehomeState extends State<capturehome> {
                   setState(() {
                     backColor= Colors.greenAccent;
                     capColor = Colors.green;
-                    beginInitState();
+                    //createNewIsolate();
+                  beginInitState();
+
                   });
                 },
                 child: Text('Start'),
@@ -166,6 +128,49 @@ class _capturehomeState extends State<capturehome> {
   )
   );//return
   } //build
+
+  List<double> calcMean(List<List<dynamic>>findMean){
+    var t = findMean.map((element) => element[0]).toList();
+    var x = findMean.map((element) => element[1]).toList();
+    var y = findMean.map((element) => element[2]).toList();
+    var z = findMean.map((element) => element[3]).toList();
+    
+    double tval = t.reduce((curr, next) => curr+next)/t.length;
+    double xval = x.reduce((curr, next) => curr+next)/x.length;
+    double yval = y.reduce((curr, next) => curr+next)/y.length;
+    double zval = z.reduce((curr, next) => curr+next)/z.length;
+
+    List<double> meanVal = [tval, xval, yval, zval];
+    print(meanVal);
+    return(meanVal);
+  }
+
+  
+  void createNewIsolate() {
+
+    ReceivePort receivePort = ReceivePort();
+    Isolate.spawn(tryFunc, receivePort.sendPort)
+        .then((isolate) {
+      //isolate = isolate;
+      print('isolate: $isolate');
+      receivePort.listen((messages) {
+        //Calculate mean
+        List<double> meanVal = calcMean(messages);
+        //store in a list
+
+        meanAccelList.add(meanVal);
+        //save csv if a condition is met
+
+        if(meanAccelList.length==300){
+          Write(meanAccelList, "accel");
+        }
+        //upload it to firebase
+        
+
+      });
+    });
+  }
+  
   @override
   void dispose() {
     super.dispose();
@@ -173,9 +178,9 @@ class _capturehomeState extends State<capturehome> {
       subscription.cancel();
     }
   }
-int count = 0;
+ 
   void beginInitState() {
-
+    int count = 0;
    List<List<dynamic>> meanAccelList = List<List<dynamic>>();
  //   List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
 
@@ -184,25 +189,32 @@ int count = 0;
    this._streamSubscriptions
         .add(accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
-        this._accelerometerValues =  <double>[event.x, event.y, event.z];
+        this._accelerometerValues =  <double>[getTime(),event.x, event.y, event.z];
 
          meanAccelList.add(_accelerometerValues);
+        // print(meanAccelList);
         count =  count+1;
-
+      //  sendPort.send(_accelerometerValues);
 
         if(count ==50){
            print("$count");
            //print("$stwatch.elapsedMilliseconds");
            print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
-           accelList.add(_accelerometerValues);
+           //accelList.add(_accelerometerValues);
+           List<double> meanVal = calcMean(meanAccelList);
            stwatch.reset();
-           print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
+           //print("Need to reset the stopwatch now : ${meanVal.toString()}");
           count =  0;
+         // meanAccelList = List<List<dynamic>>();
+        }
+        print("${meanAccelList.length}");
+        if(meanAccelList.length==10){
+          Write(meanAccelList, "accel");
         }
         //check if it has been past 30 minutes , if so then
     //    double present = getTime();
           if(count == 5000) {
-            Write(accelList, "_accel");
+          //  Write(accelList, "_accel");
           }
       });
     }));
@@ -240,5 +252,79 @@ int count = 0;
 
   }
 
+  Future<String> get localPath async {
+    final dir = await getApplicationDocumentsDirectory();
+    return(dir.path);
+  }
+//values, type
+
+  void Write(values, type) async {
+    List<List<dynamic>> toStore = new List<List<dynamic>>();
+    // Initial a csv file and push this on top of that
+    //toStore.add(values);
+    toStore = values;
+    final directory =  await localPath;
+    String filename = '/';
+    filename = filename + DateTime.now().toString();
+    filename = filename + type;
+    filename = filename + ".csv";
+    final pathOfTheFileToWrite = directory + filename;
+    //  print(pathOfTheFileToWrite);
+    File file =   File(pathOfTheFileToWrite);
+       String csv = const ListToCsvConverter().convert(toStore);
+       file.writeAsString(csv);
+       uploadFile(pathOfTheFileToWrite, file);
+    // return(file);
+  }
+
+  Future uploadFile(fileName, csvFile) async {
+    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = reference.putFile(csvFile);
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    setState(() {
+      print("Upload complete for the file $fileName");
+    });
+  }
+
+
+
 
 }//class
+
+void tryFunc(SendPort sendPort){
+  int count = 0;
+  List<List<dynamic>> meanAccelList = List<List<dynamic>>();
+  //   List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
+
+  var stwatch = new Stopwatch()..start();
+  List<StreamSubscription<dynamic>> _streamSubscriptions =
+  <StreamSubscription<dynamic>>[];
+//  WidgetsFlutterBinding.ensureInitialized();
+  _streamSubscriptions
+      .add(accelerometerEvents.listen((AccelerometerEvent event) { //setState(() {
+      List<double> _accelerometerValues =  <double>[event.x, event.y, event.z];
+
+      meanAccelList.add(_accelerometerValues);
+      count =  count+1;
+
+      if(count ==50){
+        print("$count");
+        //print("$stwatch.elapsedMilliseconds");
+        print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
+        //accelList.add(_accelerometerValues);
+        stwatch.reset();
+        print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
+        count =  0;
+      }
+      //check if it has been past 30 minutes , if so then
+      //    double present = getTime();
+      if(count == 5000) {
+        //  Write(accelList, "_accel");
+      }
+      sendPort.send(_accelerometerValues);
+
+    //});
+  }));
+
+
+}
