@@ -1,12 +1,16 @@
 # sensewear
 
-Application to stream accelerometer data on an android smartwatch.
+Application to capture accelerometer data on wearos for extended period of time.
 
-## Current Issue
+## Current Features
 
-Accelelerometer sampling rate is getting effected when a "write to csv" function is called or during file upload to firebase.
+- Sample Accelerometer data at 50Hz.
+- Calculate the mean of the accelerometer data per second, and get the resultant.
+- Convert the data into a csv file.
+- Upload the data to firebase storage every 15 minutes.
+- Device set to always on state, so it can collect data until it runs out of battery.
 
-## Fix 
+## Future
 
-Use different isolates and run parts of program on different threads.
-
+- Collect heart rate along with inertial sensors data.
+- Optimize app to be more energy effecient.
