@@ -8,12 +8,12 @@ import 'dart:convert' show utf8;
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:isolate';
-<<<<<<< HEAD
+
 //import 'package:wakelock/wakelock.dart';
-=======
+
 import 'package:wakelock/wakelock.dart';
 import 'dart:math';
->>>>>>> revive
+
 
 class capturehome extends StatefulWidget {
  // const capturehome({Key key}) : super(key: key);
@@ -100,11 +100,11 @@ class _capturehomeState extends State<capturehome> {
                     backColor= Colors.greenAccent;
                     capColor = Colors.green;
                     //createNewIsolate();
-<<<<<<< HEAD
+
                  //   Wakelock.enable();
-=======
+
                     Wakelock.enable();
->>>>>>> revive
+
                   beginInitState();
 
                   });
@@ -163,12 +163,12 @@ class _capturehomeState extends State<capturehome> {
     double yval = y.reduce((curr, next) => curr+next)/y.length;
     double zval = z.reduce((curr, next) => curr+next)/z.length;
 
-<<<<<<< HEAD
+
     List<double> meanVal = [tval, xval, yval, zval];
-=======
+
     List<double> meanVal = [xval, yval, zval];
     print(meanVal);
->>>>>>> revive
+
     return(meanVal);
   }
 
@@ -191,20 +191,20 @@ class _capturehomeState extends State<capturehome> {
 
   void beginInitState() {
     int count = 0;
-<<<<<<< HEAD
+
     int uploadCount = 0;
     int ucount = 0;
     int uuploadCount = 0;
 
-=======
+
     int ucount=0;
     int uuploadCount=0;
->>>>>>> revive
+
    List<List<dynamic>> meanAccelList = List<List<dynamic>>();
 
    var stwatch = new Stopwatch()..start();
 
-<<<<<<< HEAD
+
    this._streamSubscriptions
         .add(accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
@@ -236,7 +236,7 @@ class _capturehomeState extends State<capturehome> {
 
     //
     // this._streamSubscriptions
-=======
+
    // this._streamSubscriptions
    //      .add(accelerometerEvents.listen((AccelerometerEvent event) {
    //    setState(() {
