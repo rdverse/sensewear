@@ -24,19 +24,15 @@ dependencies:
   flutter:
     sdk: flutter
 
-  sensors:
+  sensors: ^0.4.2+4
   csv: ^4.0.3
   path_provider: ^1.6.17
   permission_handler: ^4.0.0
   scoped_model: ^1.0.1
   firebase_storage:
   random_string: ^2.1.0
-<<<<<<< HEAD
-#  wakelock: ^0.1.4+2
-=======
   wakelock: ^0.1.4+2
 
->>>>>>> revive
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3
