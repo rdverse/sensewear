@@ -54,7 +54,7 @@ class _manfilesState extends State<manfiles> {
                         child: Text("Erase"),
                         onPressed: () {
                           setState(() {
-                            status = "Delete";
+                            status = "erase";
                             handleFiles(status);
                           });
                         }),
@@ -99,6 +99,7 @@ class _manfilesState extends State<manfiles> {
     dir
         .list(recursive: true, followLinks: true)
         .listen((FileSystemEntity entity) {
+
       String fileName = entity.path;
 
       if (fileName.substring(fileName.length - 3) == "csv") {
@@ -111,7 +112,7 @@ class _manfilesState extends State<manfiles> {
             }
             break;
 
-          case "delete":
+          case "erase":
             {
               deleteFile(fileName);
             }
@@ -126,21 +127,37 @@ class _manfilesState extends State<manfiles> {
             break;
         }
       }
+      else{
+        if(fileCount==0){
+          setState(() {
+            status= "No files";
+          });
+        }
+      }
+
     });
   }
 
-  Future uploadFile(fileName) async {
+  Future<void> uploadFile(fileName) async {
     File csvFile = File(fileName);
     fileName = "/backup" + fileName;
     final StorageReference reference =
         await FirebaseStorage.instance.ref().child(fileName);
     final StorageUploadTask uploadTask = await reference.putFile(csvFile);
-    return uploadTask;
-  }
+    }
 
-  Future deleteFile(fileName) async {
-    File file = File(fileName);
-    await file.delete();
-    return null;
+  Future<void> deleteFile(fileName) async {
+    print("file is deleted : $fileName");
+
+    try {
+      var file = File(fileName);
+
+      if (await file.exists()) {
+        await file.delete();
+         print("file is deleted : $fileName");
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 }

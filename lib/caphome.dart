@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:isolate';
 import 'manfiles.dart';
 import 'package:csv/csv.dart';
-import 'dart:convert' show utf8;
 import 'package:screen/screen.dart';
 import 'package:sensors/sensors.dart';
 import 'package:flutter/material.dart';
@@ -95,8 +94,10 @@ class _capturehomeState extends State<capturehome> {
                     heroTag: "stop",
                     onPressed: () {
                       setState(() {
+
                         backColor = Colors.deepOrangeAccent;
                         capColor = Colors.red;
+                        beginInitState(upcount:10);
                         //     Read();
                         quit();
                         //dispose();
@@ -156,9 +157,9 @@ class _capturehomeState extends State<capturehome> {
     return (res);
   }
 
-  void beginInitState() {
+  void beginInitState({upcount:0}) {
     int ucount = 0;
-    int uuploadCount = 0;
+    int uuploadCount = upcount;
 
     this
         ._streamSubscriptions
@@ -183,7 +184,7 @@ class _capturehomeState extends State<capturehome> {
           meanUserAccelList = List<List<dynamic>>();
         }
 
-        if (uuploadCount == 1000) {
+        if (uuploadCount == 10) {
           Write(userAccelList, "_user_accel");
           userAccelList = List<List<dynamic>>();
           uuploadCount = 0;
@@ -201,24 +202,24 @@ class _capturehomeState extends State<capturehome> {
     return (dir.path);
   }
 
-//values, type
 
   Future Write(values, type) async {
     List<List<dynamic>> toStore = new List<List<dynamic>>();
     // Initial a csv file and push this on top of that
     //toStore.add(values);
     toStore = values;
-    //final directory =  await localPath;
-    String directory = "/data/user/0/com.example.sensewear/app_flutter/csvdata/";
-    String filename = DateTime.now().toString();
+    final directory =  await localPath;
+
+    String filename = "/" + DateTime.now().toString();
     filename = filename + type;
     filename = filename + ".csv";
-    final pathOfTheFileToWrite = directory + filename;
+
+    final fileName = directory + filename;
     //  print(pathOfTheFileToWrite);
-    File file = File(pathOfTheFileToWrite);
+    File file = File(fileName);
     String csv = const ListToCsvConverter().convert(toStore);
     await file.writeAsString(csv);
-    await uploadFile(pathOfTheFileToWrite, file);
+    await uploadFile(fileName, file);
     return(file);
   }
 
