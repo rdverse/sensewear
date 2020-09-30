@@ -9,7 +9,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:isolate';
-
+import 'package:wakelock/wakelock.dart';
+import 'dart:math';
 
 class capturehome extends StatefulWidget {
   @override
@@ -85,6 +86,7 @@ class _capturehomeState extends State<capturehome> {
                     backColor= Colors.greenAccent;
                     capColor = Colors.green;
                     //createNewIsolate();
+                    Wakelock.enable();
                   beginInitState();
 
                   });
@@ -130,17 +132,16 @@ class _capturehomeState extends State<capturehome> {
   } //build
 
   List<double> calcMean(List<List<dynamic>>findMean){
-    var t = findMean.map((element) => element[0]).toList();
-    var x = findMean.map((element) => element[1]).toList();
-    var y = findMean.map((element) => element[2]).toList();
-    var z = findMean.map((element) => element[3]).toList();
-    
-    double tval = t.reduce((curr, next) => curr+next)/t.length;
+
+    var x = findMean.map((element) => element[0]).toList();
+    var y = findMean.map((element) => element[1]).toList();
+    var z = findMean.map((element) => element[2]).toList();
+
     double xval = x.reduce((curr, next) => curr+next)/x.length;
     double yval = y.reduce((curr, next) => curr+next)/y.length;
     double zval = z.reduce((curr, next) => curr+next)/z.length;
 
-    List<double> meanVal = [tval, xval, yval, zval];
+    List<double> meanVal = [xval, yval, zval];
     print(meanVal);
     return(meanVal);
   }
@@ -178,48 +179,56 @@ class _capturehomeState extends State<capturehome> {
       subscription.cancel();
     }
   }
- 
+
+  double getEuc(xyz){
+    double res = pow(xyz[0], 2) + pow(xyz[1], 2) + pow(xyz[2], 2);
+    res = sqrt(res);
+    return(res);
+  }
+
   void beginInitState() {
     int count = 0;
+    int ucount=0;
+    int uuploadCount=0;
    List<List<dynamic>> meanAccelList = List<List<dynamic>>();
  //   List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
 
    var stwatch = new Stopwatch()..start();
 
-   this._streamSubscriptions
-        .add(accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        this._accelerometerValues =  <double>[getTime(),event.x, event.y, event.z];
+   // this._streamSubscriptions
+   //      .add(accelerometerEvents.listen((AccelerometerEvent event) {
+   //    setState(() {
+   //      this._accelerometerValues =  <double>[getTime(),event.x, event.y, event.z];
+   //
+   //       meanAccelList.add(_accelerometerValues);
+   //      // print(meanAccelList);
+   //      count =  count+1;
+   //    //  sendPort.send(_accelerometerValues);
+   //
+   //      if(count ==50){
+   //         print("$count");
+   //         //print("$stwatch.elapsedMilliseconds");
+   //         print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
+   //         //accelList.add(_accelerometerValues);
+   //         List<double> meanVal = calcMean(meanAccelList);
+   //         stwatch.reset();
+   //         //print("Need to reset the stopwatch now : ${meanVal.toString()}");
+   //        count =  0;
+   //       // meanAccelList = List<List<dynamic>>();
+   //      }
+   //      print("${meanAccelList.length}");
+   //      if(meanAccelList.length==10){
+   //        Write(meanAccelList, "accel");
+   //      }
+   //      //check if it has been past 30 minutes , if so then
+   //  //    double present = getTime();
+   //        if(count == 5000) {
+   //        //  Write(accelList, "_accel");
+   //        }
+   //    });
+   //  }));
 
-         meanAccelList.add(_accelerometerValues);
-        // print(meanAccelList);
-        count =  count+1;
-      //  sendPort.send(_accelerometerValues);
-
-        if(count ==50){
-           print("$count");
-           //print("$stwatch.elapsedMilliseconds");
-           print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
-           //accelList.add(_accelerometerValues);
-           List<double> meanVal = calcMean(meanAccelList);
-           stwatch.reset();
-           //print("Need to reset the stopwatch now : ${meanVal.toString()}");
-          count =  0;
-         // meanAccelList = List<List<dynamic>>();
-        }
-        print("${meanAccelList.length}");
-        if(meanAccelList.length==10){
-          Write(meanAccelList, "accel");
-        }
-        //check if it has been past 30 minutes , if so then
-    //    double present = getTime();
-          if(count == 5000) {
-          //  Write(accelList, "_accel");
-          }
-      });
-    }));
-
-
+    //
     // _streamSubscriptions
     //     .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
     //   setState(()  {
@@ -241,6 +250,41 @@ class _capturehomeState extends State<capturehome> {
     //     }
     //   });
     // }));
+    this._streamSubscriptions
+        .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      setState(()  {
+
+        this._userAccelerometerValues = <double>[getTime(), event.x, event.y, event.z];
+
+        meanUserAccelList.add(_userAccelerometerValues);
+        ucount =  ucount+1;
+
+
+        if(ucount ==5){
+          List<double> meanUserVal = calcMean(meanUserAccelList);
+          stwatch.reset();
+          //add time and resultant acceleration to the meanUserVal list
+          meanUserVal.add(getEuc(meanUserVal));
+          meanUserVal.insert(0, getTime());
+
+          userAccelList.add(meanUserVal);
+
+          uuploadCount = uuploadCount+1;
+          print(uuploadCount);
+          ucount =  0;
+          meanUserAccelList = List<List<dynamic>>();
+        }
+
+        if(uuploadCount==1000 ){
+          Write(userAccelList, "_user_accel");
+          userAccelList = List<List<dynamic>>();
+          uuploadCount=0;
+        }
+      });
+    }));
+
+
+
   }
 
   double getTime(){
@@ -278,12 +322,12 @@ class _capturehomeState extends State<capturehome> {
   }
 
   Future uploadFile(fileName, csvFile) async {
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = reference.putFile(csvFile);
-    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
-    setState(() {
-      print("Upload complete for the file $fileName");
-    });
+    final StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    final StorageUploadTask uploadTask = reference.putFile(csvFile);
+    // StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    // setState(() {
+    //   print("Upload complete for the file $fileName");
+    // });
   }
 
 
