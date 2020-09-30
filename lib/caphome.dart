@@ -1,18 +1,19 @@
-import 'package:flutter/material.dart';
-//import 'package:sensewear/dispatcher.dart';
-import 'package:sensors/sensors.dart';
+import 'dart:io';
+import 'dart:math';
 import 'dart:async';
-import 'package:path_provider/path_provider.dart';
+import 'dart:isolate';
 import 'package:csv/csv.dart';
 import 'dart:convert' show utf8;
-import 'dart:convert';
-import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:isolate';
+import 'package:screen/screen.dart';
+import 'package:sensors/sensors.dart';
+import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
-import 'dart:math';
+import 'package:path_provider/path_provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 
 class capturehome extends StatefulWidget {
+
   @override
   _capturehomeState createState() => _capturehomeState();
 }
@@ -27,10 +28,6 @@ class _capturehomeState extends State<capturehome> {
   List<double> _accelerometerValues;
   List<double> _userAccelerometerValues;
 
-  double start = DateTime
-                    .now()
-                    .millisecondsSinceEpoch
-                    .toDouble();
 
   List<List<dynamic>> accelList = List<List<dynamic>>();
   List<List<dynamic>> userAccelList = List<List<dynamic>>();
@@ -86,7 +83,9 @@ class _capturehomeState extends State<capturehome> {
                     backColor= Colors.greenAccent;
                     capColor = Colors.green;
                     //createNewIsolate();
-                    Wakelock.enable();
+                    Screen.setBrightness(0.1);
+                    Screen.keepOn(true);
+                    //Wakelock.enable();
                   beginInitState();
 
                   });
@@ -117,11 +116,10 @@ class _capturehomeState extends State<capturehome> {
 
 
 
-          if(_accelerometerValues!=null)
+          if(_userAccelerometerValues!=null)
             Text("accel: x: ${_accelerometerValues
                 .map((e) => e.toInt())
-                .toList()
-                .sublist(0,3)}"),
+                .toList()}"),
 
         ]
     ),
@@ -146,31 +144,8 @@ class _capturehomeState extends State<capturehome> {
     return(meanVal);
   }
 
-  
-  void createNewIsolate() {
 
-    ReceivePort receivePort = ReceivePort();
-    Isolate.spawn(tryFunc, receivePort.sendPort)
-        .then((isolate) {
-      //isolate = isolate;
-      print('isolate: $isolate');
-      receivePort.listen((messages) {
-        //Calculate mean
-        List<double> meanVal = calcMean(messages);
-        //store in a list
 
-        meanAccelList.add(meanVal);
-        //save csv if a condition is met
-
-        if(meanAccelList.length==300){
-          Write(meanAccelList, "accel");
-        }
-        //upload it to firebase
-        
-
-      });
-    });
-  }
   
   @override
   void dispose() {
@@ -187,74 +162,14 @@ class _capturehomeState extends State<capturehome> {
   }
 
   void beginInitState() {
-    int count = 0;
     int ucount=0;
     int uuploadCount=0;
-   List<List<dynamic>> meanAccelList = List<List<dynamic>>();
- //   List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
 
-   var stwatch = new Stopwatch()..start();
-
-   // this._streamSubscriptions
-   //      .add(accelerometerEvents.listen((AccelerometerEvent event) {
-   //    setState(() {
-   //      this._accelerometerValues =  <double>[getTime(),event.x, event.y, event.z];
-   //
-   //       meanAccelList.add(_accelerometerValues);
-   //      // print(meanAccelList);
-   //      count =  count+1;
-   //    //  sendPort.send(_accelerometerValues);
-   //
-   //      if(count ==50){
-   //         print("$count");
-   //         //print("$stwatch.elapsedMilliseconds");
-   //         print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
-   //         //accelList.add(_accelerometerValues);
-   //         List<double> meanVal = calcMean(meanAccelList);
-   //         stwatch.reset();
-   //         //print("Need to reset the stopwatch now : ${meanVal.toString()}");
-   //        count =  0;
-   //       // meanAccelList = List<List<dynamic>>();
-   //      }
-   //      print("${meanAccelList.length}");
-   //      if(meanAccelList.length==10){
-   //        Write(meanAccelList, "accel");
-   //      }
-   //      //check if it has been past 30 minutes , if so then
-   //  //    double present = getTime();
-   //        if(count == 5000) {
-   //        //  Write(accelList, "_accel");
-   //        }
-   //    });
-   //  }));
-
-    //
-    // _streamSubscriptions
-    //     .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-    //   setState(()  {
-    //
-    //     this._userAccelerometerValues = <double>[event.x, event.y, event.z];
-    //     _userAccelerometerValues.insert(0,DateTime.now()
-    //         .millisecondsSinceEpoch
-    //         .toDouble());
-    //
-    //     Timer.periodic(Duration(seconds : 1), (timer) {
-    //       userAccelList.add(_userAccelerometerValues);
-    //     });
-    //     //printy();
-    //     //check if it has been past 30 minutes , if so then
-    //     double present = getTime();
-    //
-    //     if(getDiff(present, start)>26){
-    //       Write(userAccelList, "_accel_cal");
-    //     }
-    //   });
-    // }));
     this._streamSubscriptions
         .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       setState(()  {
 
-        this._userAccelerometerValues = <double>[getTime(), event.x, event.y, event.z];
+        this._userAccelerometerValues = <double>[ event.x, event.y, event.z];
 
         meanUserAccelList.add(_userAccelerometerValues);
         ucount =  ucount+1;
@@ -262,7 +177,6 @@ class _capturehomeState extends State<capturehome> {
 
         if(ucount ==5){
           List<double> meanUserVal = calcMean(meanUserAccelList);
-          stwatch.reset();
           //add time and resultant acceleration to the meanUserVal list
           meanUserVal.add(getEuc(meanUserVal));
           meanUserVal.insert(0, getTime());
@@ -282,19 +196,12 @@ class _capturehomeState extends State<capturehome> {
         }
       });
     }));
-
-
-
   }
 
   double getTime(){
     return(DateTime.now().millisecondsSinceEpoch.toDouble());
   }
 
-  double getDiff(present,start){
-    return((present-start)/60000);
-
-  }
 
   Future<String> get localPath async {
     final dir = await getApplicationDocumentsDirectory();
@@ -307,7 +214,8 @@ class _capturehomeState extends State<capturehome> {
     // Initial a csv file and push this on top of that
     //toStore.add(values);
     toStore = values;
-    final directory =  await localPath;
+    //final directory =  await localPath;
+    String directory = "/data/user/0/com.example.sensewear/app_flutter";
     String filename = '/';
     filename = filename + DateTime.now().toString();
     filename = filename + type;
@@ -316,59 +224,20 @@ class _capturehomeState extends State<capturehome> {
     //  print(pathOfTheFileToWrite);
     File file =   File(pathOfTheFileToWrite);
        String csv = const ListToCsvConverter().convert(toStore);
-       file.writeAsString(csv);
-       uploadFile(pathOfTheFileToWrite, file);
+       await file.writeAsString(csv);
+       await uploadFile(pathOfTheFileToWrite, file);
     // return(file);
   }
 
   Future uploadFile(fileName, csvFile) async {
-    final StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    final StorageUploadTask uploadTask = reference.putFile(csvFile);
+    final StorageReference reference = await FirebaseStorage.instance.ref().child(fileName);
+    final StorageUploadTask uploadTask = await reference.putFile(csvFile);
     // StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     // setState(() {
     //   print("Upload complete for the file $fileName");
     // });
+    return uploadTask;
   }
-
-
-
 
 }//class
 
-void tryFunc(SendPort sendPort){
-  int count = 0;
-  List<List<dynamic>> meanAccelList = List<List<dynamic>>();
-  //   List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
-
-  var stwatch = new Stopwatch()..start();
-  List<StreamSubscription<dynamic>> _streamSubscriptions =
-  <StreamSubscription<dynamic>>[];
-//  WidgetsFlutterBinding.ensureInitialized();
-  _streamSubscriptions
-      .add(accelerometerEvents.listen((AccelerometerEvent event) { //setState(() {
-      List<double> _accelerometerValues =  <double>[event.x, event.y, event.z];
-
-      meanAccelList.add(_accelerometerValues);
-      count =  count+1;
-
-      if(count ==50){
-        print("$count");
-        //print("$stwatch.elapsedMilliseconds");
-        print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
-        //accelList.add(_accelerometerValues);
-        stwatch.reset();
-        print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
-        count =  0;
-      }
-      //check if it has been past 30 minutes , if so then
-      //    double present = getTime();
-      if(count == 5000) {
-        //  Write(accelList, "_accel");
-      }
-      sendPort.send(_accelerometerValues);
-
-    //});
-  }));
-
-
-}
