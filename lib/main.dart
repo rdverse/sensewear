@@ -9,6 +9,7 @@ void main() {
 //  await WidgetsFlutterBinding.ensureInitialized();
   //TestWidgetsFlutterBinding.ensureInitialized()
   //tryFunc(SendPort sendPort),
-   runApp(capturehome());
+   runApp(MaterialApp(
+       home:capturehome()));
 }
 
