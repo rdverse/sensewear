@@ -5,11 +5,13 @@ import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'dart:convert' show utf8;
-import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:isolate';
+//import 'package:wakelock/wakelock.dart';
+
 class capturehome extends StatefulWidget {
+ // const capturehome({Key key}) : super(key: key);
   @override
   _capturehomeState createState() => _capturehomeState();
 }
@@ -93,6 +95,7 @@ class _capturehomeState extends State<capturehome> {
                     backColor= Colors.greenAccent;
                     capColor = Colors.green;
                     //createNewIsolate();
+                 //   Wakelock.enable();
                   beginInitState();
 
                   });
@@ -109,6 +112,7 @@ class _capturehomeState extends State<capturehome> {
                     backColor = Colors.deepOrangeAccent;
                     capColor = Colors.red;
                //     Read();
+                 //   Wakelock.disable();
                     quitStream();
                   });
                 },
@@ -176,64 +180,64 @@ class _capturehomeState extends State<capturehome> {
 
    var stwatch = new Stopwatch()..start();
 
-   // this._streamSubscriptions
-   //      .add(accelerometerEvents.listen((AccelerometerEvent event) {
-   //    setState(() {
-   //      this._accelerometerValues =  <double>[getTime(),event.x, event.y, event.z];
-   //
-   //       meanAccelList.add(_accelerometerValues);
-   //      count =  count+1;
-   //
-   //
-   //      if(count ==50){
-   //         print("$count");
-   //         print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
-   //         //accelList.add(_accelerometerValues);
-   //         List<double> meanVal = calcMean(meanAccelList);
-   //         stwatch.reset();
-   //         accelList.add(meanVal);
-   //         uploadCount = uploadCount+1;
-   //        count =  0;
-   //        meanAccelList = List<List<dynamic>>();
-   //      }
-   //
-   //      if(uploadCount==10){
-   //        Write(accelList, "accel");
-   //        accelList = List<List<dynamic>>();
-   //        uploadCount=0;
-   //      }
-   //    });
-   //  }));
+   this._streamSubscriptions
+        .add(accelerometerEvents.listen((AccelerometerEvent event) {
+      setState(() {
+        this._accelerometerValues =  <double>[getTime(),event.x, event.y, event.z];
+
+         meanAccelList.add(_accelerometerValues);
+        count =  count+1;
 
 
-    this._streamSubscriptions
-        .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      setState(()  {
-
-        this._userAccelerometerValues = <double>[getTime(), event.x, event.y, event.z];
-
-        meanUserAccelList.add(_userAccelerometerValues);
-        ucount =  ucount+1;
-
-
-        if(ucount ==5){
-          List<double> meanUserVal = calcMean(meanUserAccelList);
-          stwatch.reset();
-          userAccelList.add(meanUserVal);
-          uuploadCount = uuploadCount+1;
-          print(uuploadCount);
-          ucount =  0;
-          meanUserAccelList = List<List<dynamic>>();
+        if(count ==50){
+           print("$count");
+           print("Need to reset the stopwatch now : ${stwatch.elapsedMilliseconds}");
+           //accelList.add(_accelerometerValues);
+           List<double> meanVal = calcMean(meanAccelList);
+           stwatch.reset();
+           accelList.add(meanVal);
+           uploadCount = uploadCount+1;
+          count =  0;
+          meanAccelList = List<List<dynamic>>();
         }
 
-        if(uuploadCount==1000 ){
-          Write(userAccelList, "_user_accel");
-          userAccelList = List<List<dynamic>>();
-          uuploadCount=0;
+        if(uploadCount==10){
+          Write(accelList, "accel");
+          accelList = List<List<dynamic>>();
+          uploadCount=0;
         }
-
       });
     }));
+
+    //
+    // this._streamSubscriptions
+    //     .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+    //   setState(()  {
+    //
+    //     this._userAccelerometerValues = <double>[getTime(), event.x, event.y, event.z];
+    //
+    //     meanUserAccelList.add(_userAccelerometerValues);
+    //     ucount =  ucount+1;
+    //
+    //
+    //     if(ucount ==5){
+    //       List<double> meanUserVal = calcMean(meanUserAccelList);
+    //       stwatch.reset();
+    //       userAccelList.add(meanUserVal);
+    //       uuploadCount = uuploadCount+1;
+    //       print(uuploadCount);
+    //       ucount =  0;
+    //       meanUserAccelList = List<List<dynamic>>();
+    //     }
+    //
+    //     if(uuploadCount==1000 ){
+    //       Write(userAccelList, "_user_accel");
+    //       userAccelList = List<List<dynamic>>();
+    //       uuploadCount=0;
+    //     }
+    //
+    //   });
+    // }));
 
   }
 

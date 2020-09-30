@@ -8,5 +8,7 @@ import io.flutter.plugins.GeneratedPluginRegistrant
 
 import androidx.wear.ambient.AmbientMode
 
-class MainActivity: FlutterActivity(){
+class MainActivity : FlutterActivity() {
+
+
 }
