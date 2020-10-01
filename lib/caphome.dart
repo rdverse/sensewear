@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:move_to_background/move_to_background.dart';
 
 class capturehome extends StatefulWidget {
   @override
@@ -18,10 +19,11 @@ class capturehome extends StatefulWidget {
 
 class _capturehomeState extends State<capturehome> {
   Isolate isolate;
+  String capText = "Idle";
 
   //Variables to initialize
-  Color capColor = Colors.deepOrangeAccent;
-  Color backColor = Colors.white60;
+  Color capColor = Colors.teal;
+  Color backColor = Colors.indigoAccent;
 
   List<double> _accelerometerValues;
   List<double> _userAccelerometerValues;
@@ -33,7 +35,7 @@ class _capturehomeState extends State<capturehome> {
   List<List<dynamic>> meanUserAccelList = List<List<dynamic>>();
 
   List<StreamSubscription<dynamic>> _streamSubscriptions =
-      <StreamSubscription<dynamic>>[];
+  <StreamSubscription<dynamic>>[];
 
   // This widget is the root of your application.
 
@@ -46,11 +48,11 @@ class _capturehomeState extends State<capturehome> {
     return (Scaffold(
       backgroundColor: backColor,
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(15, 200, 250, 0.8),
+        backgroundColor: capColor, //Color.fromRGBO(15, 200, 250, 0.8),
         title: Text(
           'Sensors Data',
           style: TextStyle(
-              color: Colors.black.withOpacity(0.8),
+              color: Colors.white.withOpacity(0.8),
               fontSize: 20.0,
               fontWeight: FontWeight.bold,
               fontFamily: 'BadScript'),
@@ -66,44 +68,59 @@ class _capturehomeState extends State<capturehome> {
               children: <Widget>[
                 Container(
                   child: Text(
-                    'Capture',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    capText,
+                    style: TextStyle(fontWeight: FontWeight.bold,
+                        color: Colors.white
+                    ),
                   ),
                   padding: EdgeInsets.fromLTRB(3, 20, 3, 20),
-                  color: capColor,
+                  color: Colors.black,
                 ),
                 Container(
                   child: FloatingActionButton(
                     heroTag: "start",
+                    backgroundColor: Colors.grey,
                     onPressed: () {
                       setState(() {
-                        backColor = Colors.greenAccent;
-                        capColor = Colors.green;
+                        capText = "Record";
+                        backColor = Colors.black;
+                        capColor = Colors.black87;
                         //createNewIsolate();
-                        Screen.setBrightness(0.1);
-                        Screen.keepOn(true);
+                      //  Screen.setBrightness(0.1);
+                       // Screen.keepOn(true);
                         //Wakelock.enable();
+                        MoveToBackground.moveTaskToBack();
                         beginInitState();
                       });
                     },
-                    child: Text('Start'),
+                    child: Text('Start',
+                      style: TextStyle(
+                          color: Colors.white
+                      ),
+                    ),
+
                   ),
                 ),
                 Container(
                   child: FloatingActionButton(
                     heroTag: "stop",
+                    backgroundColor: Colors.grey,
                     onPressed: () {
                       setState(() {
-
-                        backColor = Colors.deepOrangeAccent;
-                        capColor = Colors.red;
-                        beginInitState(upcount:10);
+                        capText = "Stopped";
+                        backColor = Colors.grey;
+                        capColor = Colors.black;
+                        beginInitState(upcount: 1000);
                         //     Read();
                         quit();
                         //dispose();
                       });
                     },
-                    child: Text('Stop'),
+                    child: Text('Stop',
+                      style: TextStyle(
+                          color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -122,9 +139,10 @@ class _capturehomeState extends State<capturehome> {
               ),
             ),
 
-            if (_userAccelerometerValues != null)
-              Text(
-                  "accel: x: ${_userAccelerometerValues.map((e) => e.toInt()).toList()}"),
+         //   if (_userAccelerometerValues != null)
+           //   Text(
+             //     "accel: x: ${_userAccelerometerValues.map((e) => e.toInt())
+               //       .toList()}"),
           ]),
     )); //return
   } //build
@@ -157,7 +175,7 @@ class _capturehomeState extends State<capturehome> {
     return (res);
   }
 
-  void beginInitState({upcount:0}) {
+  void beginInitState({upcount: 0}) {
     int ucount = 0;
     int uuploadCount = upcount;
 
@@ -184,7 +202,7 @@ class _capturehomeState extends State<capturehome> {
           meanUserAccelList = List<List<dynamic>>();
         }
 
-        if (uuploadCount == 10) {
+        if (uuploadCount == 1000) {
           Write(userAccelList, "_user_accel");
           userAccelList = List<List<dynamic>>();
           uuploadCount = 0;
@@ -194,7 +212,10 @@ class _capturehomeState extends State<capturehome> {
   }
 
   double getTime() {
-    return (DateTime.now().millisecondsSinceEpoch.toDouble());
+    return (DateTime
+        .now()
+        .millisecondsSinceEpoch
+        .toDouble());
   }
 
   Future<String> get localPath async {
@@ -208,7 +229,7 @@ class _capturehomeState extends State<capturehome> {
     // Initial a csv file and push this on top of that
     //toStore.add(values);
     toStore = values;
-    final directory =  await localPath;
+    final directory = await localPath;
 
     String filename = "/" + DateTime.now().toString();
     filename = filename + type;
@@ -219,13 +240,13 @@ class _capturehomeState extends State<capturehome> {
     File file = File(fileName);
     String csv = const ListToCsvConverter().convert(toStore);
     await file.writeAsString(csv);
-    await uploadFile(fileName, file);
-    return(file);
+//    await uploadFile(fileName, file);
+    return (file);
   }
 
   Future uploadFile(fileName, csvFile) async {
     final StorageReference reference =
-        await FirebaseStorage.instance.ref().child(fileName);
+    await FirebaseStorage.instance.ref().child(fileName);
     final StorageUploadTask uploadTask = await reference.putFile(csvFile);
     // StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     // setState(() {
